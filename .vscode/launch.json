@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BtpApplication<btp>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.backtestpro.btp.BtpApplication",
+            "projectName": "btp",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
