@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.backtestpro.btp.service.StockService;
 import com.backtestpro.btp.service.InvestmentService;
+import com.backtestpro.btp.pojo.InvestmentData;
 import com.backtestpro.btp.pojo.StockData;
 
 import java.io.IOException;
@@ -41,19 +42,19 @@ public class StockController {
     }
 
     @PostMapping("/regular-investment")
-    public Double getRegularInvestmentReturn(
+    public List<InvestmentData> getRegularInvestmentReturn(
             @RequestParam String symbol,
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam double investmentAmount,
-            @RequestParam String investmentDate) {
+            @RequestParam String investmentDay) {
 
         try {
-            return investmentService.calculateInvestmentReturn(symbol, startDate, endDate, investmentAmount, investmentDate);
+            return investmentService.getInvestmentData(symbol, startDate, endDate, investmentAmount, investmentDay);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return 0.0;
+            return null;
         }
     }
 }
