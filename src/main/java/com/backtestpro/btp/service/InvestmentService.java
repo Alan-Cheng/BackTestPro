@@ -28,7 +28,8 @@ public class InvestmentService {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public List<StockData> filterStockDataByInvestmentDay(List<StockData> stockDataList, String investmentDay, int investmentYear) {
+    public List<StockData> filterStockDataByInvestmentDay(List<StockData> stockDataList, String investmentDay,
+            int investmentYear) {
         return stockDataList.stream()
                 .collect(Collectors.groupingBy(data -> LocalDate.parse(data.getDate(), DATE_FORMATTER).getMonth())) // 按月分组
                 .values().stream()
@@ -47,7 +48,7 @@ public class InvestmentService {
                     return date.getDayOfMonth() == investmentDayInt && date.getYear() == investmentYear; // 精确匹配投资日和年份
                 })
                 .findFirst();
-    
+
         // 如果找到，则返回该数据；否则查找最接近的下一天
         return exactMatch.isPresent() ? exactMatch
                 : monthlyData.stream()
@@ -57,14 +58,14 @@ public class InvestmentService {
                         })
                         .min(Comparator.comparing(data -> LocalDate.parse(data.getDate(), DATE_FORMATTER))); // 选取最接近的日期
     }
-    
 
     public List<InvestmentData> getInvestmentData(String symbol, String startDate, String endDate,
             double investmentAmount, String investmentDay) {
 
         List<StockData> stockDataList = stockService.getStockData(symbol, startDate, endDate);
         // 使用 filterStockDataByInvestmentDay 获取每个投资日的数据，若有多年則接續年份
-        List<Integer> yearList = Stream.iterate(LocalDate.parse(startDate, DATE_FORMATTER).getYear(), year -> year + 1).limit(5).collect(Collectors.toList());
+        List<Integer> yearList = Stream.iterate(LocalDate.parse(startDate, DATE_FORMATTER).getYear(), year -> year + 1)
+                .limit(5).collect(Collectors.toList());
         List<StockData> filteredStockData = new ArrayList<>();
         for (int year : yearList) {
             filteredStockData.addAll(filterStockDataByInvestmentDay(stockDataList, investmentDay, year));
@@ -79,34 +80,33 @@ public class InvestmentService {
             InvestmentData investmentData = new InvestmentData();
             investmentData.setInvestmentDate(stockData.getDate());
             investmentData.setInvestmentAmount(investmentAmount);
-    
+
             // 计算当前总资产
             totalAmount += investmentAmount; // 累加投资金额
             investmentData.setTotalAmount(totalAmount);
-    
+
             // 获取当前价格
             double currentPrice = stockData.getClose();
-            
+
             // 計算當前股份
             totalShares += investmentAmount / currentPrice;
             investmentData.setShares(totalShares);
 
-            //計算當前收益
-            //(本期購買後擁有的股份)*(本期股價)-(總投入資金)
+            // 計算當前收益
+            // (本期購買後擁有的股份)*(本期股價)-(總投入資金)
             double currentReturn = totalShares * currentPrice - totalAmount;
             investmentData.setTotalReturn(currentReturn);
 
-            //計算當前收益率
+            // 計算當前收益率
             double totalReturnRate = currentReturn / totalAmount;
             investmentData.setTotalReturnRate(totalReturnRate);
-            
-    
+
             // 设置购买的股票列表
             investmentData.setStock(stockData);
-    
+
             investmentDataList.add(investmentData);
         }
-    
+
         return investmentDataList;
     }
 }

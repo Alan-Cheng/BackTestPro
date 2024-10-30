@@ -5,14 +5,19 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.io.File;
+import java.net.URL;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import com.backtestpro.btp.pojo.StockData;
+import com.backtestpro.btp.pojo.StockInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -66,5 +71,51 @@ public class StockService {
             e.printStackTrace();
         }
         return stockDataList;
+    }
+
+    public List<StockInfo> getAllStockInfo() {
+        String urlString = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL";
+        List<StockInfo> stockList = new ArrayList<>(); // 在方法外部声明
+
+        try {
+            // 创建 URL 对象
+            URL url = new URL(urlString);
+            // 打开连接
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            // 设置请求方法
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+
+            // 检查响应代码
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // 读取响应
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String inputLine;
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                // 解析 JSON 响应
+                JSONArray jsonArray = new JSONArray(response.toString());
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String code = jsonObject.getString("Code");
+                    String name = jsonObject.getString("Name"); // 假设股票名称的字段为 "Name"
+                    stockList.add(new StockInfo(code, name));
+                }
+            } else {
+                System.out.println("GET request failed. Response Code: " + responseCode);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return stockList; // 返回股票信息列表
     }
 }

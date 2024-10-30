@@ -11,6 +11,7 @@ import com.backtestpro.btp.service.StockService;
 import com.backtestpro.btp.service.InvestmentService;
 import com.backtestpro.btp.pojo.InvestmentData;
 import com.backtestpro.btp.pojo.StockData;
+import com.backtestpro.btp.pojo.StockInfo;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -57,4 +58,10 @@ public class StockController {
             return null;
         }
     }
+
+    @GetMapping("/stock-info")
+    public List<StockInfo> getAllStockSymbol() {
+        return stockService.getAllStockInfo();
+    }
+    
 }
