@@ -32,6 +32,12 @@ def clean_and_convert(column):
     column = pd.to_numeric(column, errors='coerce')
     return column
 
+def convert_roc_to_ad(roc_date):
+    # 分割民國年/月/日並轉換成西元年
+    year, month, day = map(int, roc_date.split('/'))
+    ad_year = year + 1911
+    return f"{ad_year}-{month:02d}-{day:02d}"
+
 
 def twse_api_request(symbol, date):
     html = requests.get('https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=%s&stockNo=%s' % (date,symbol))
@@ -39,6 +45,7 @@ def twse_api_request(symbol, date):
     stock_data = content['data']
     col_name = content['fields']
     df = pd.DataFrame(stock_data, columns=col_name)
+    df['股票代號'] = symbol
 
     #處理資料中的逗號與小數點
     columns_to_clean = [
@@ -52,6 +59,9 @@ def twse_api_request(symbol, date):
     "成交筆數"
     ]
     df[columns_to_clean] = df[columns_to_clean].apply(clean_and_convert)
+
+    # 將日期從民國紀年轉為西元年
+    df['日期'] = df['日期'].apply(convert_roc_to_ad)
 
     return df
 

@@ -1,64 +1,84 @@
 package com.backtestpro.btp.pojo;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
+import java.util.List;
 public class InvestmentData {
 
     // 投资日期
-    private LocalDateTime investmentDate;
+    private String investmentDate;
     
     // 每期投资金额
-    private BigDecimal investmentAmount;
+    private double investmentAmount;
     
     // 累计资产总额
-    private BigDecimal totalAmount;
+    private double totalAmount;
     
-    // 当前总收益
-    private BigDecimal totalProfit;
-    
-    // 当前收益率
-    private BigDecimal returnRate;
+    //累計股份
+    private double shares;
+
+    //累積報酬
+    private double totalReturn;
+
+    //當前收益率
+    private double totalReturnRate;
+
+    //購買的股票
+    private StockData stock;
 
     // Getter 和 Setter 方法
 
-    public LocalDateTime getInvestmentDate() {
+    public String getInvestmentDate() {
         return investmentDate;
     }
 
-    public void setInvestmentDate(LocalDateTime investmentDate) {
+    public void setInvestmentDate(String investmentDate) {
         this.investmentDate = investmentDate;
     }
 
-    public BigDecimal getInvestmentAmount() {
+    public double getInvestmentAmount() {
         return investmentAmount;
     }
 
-    public void setInvestmentAmount(BigDecimal investmentAmount) {
+    public void setInvestmentAmount(double investmentAmount) {
         this.investmentAmount = investmentAmount;
     }
 
-    public BigDecimal getTotalAmount() {
+    public double getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
+    public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalProfit() {
-        return totalProfit;
+    public double getShares() {
+        return shares;
     }
 
-    public void setTotalProfit(BigDecimal totalProfit) {
-        this.totalProfit = totalProfit;
+    public void setShares(double shares) {
+        this.shares = shares;
     }
 
-    public BigDecimal getReturnRate() {
-        return returnRate;
+    public StockData getStock() {
+        return stock;
     }
 
-    public void setReturnRate(BigDecimal returnRate) {
-        this.returnRate = returnRate;
+    public void setStock(StockData stock) {
+        this.stock = stock;
+    }
+
+    public double getTotalReturn() {
+        return totalReturn;
+    }
+
+    public void setTotalReturn(double totalReturn) {
+        this.totalReturn = totalReturn;
+    }
+
+    public double getTotalReturnRate() {
+        return totalReturnRate;
+    }
+
+    public void setTotalReturnRate(double totalReturnRate) {
+        this.totalReturnRate = totalReturnRate;
     }
 }

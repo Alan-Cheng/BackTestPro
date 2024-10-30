@@ -3,6 +3,9 @@ package com.backtestpro.btp.pojo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StockData {
+    @JsonProperty("股票代號")
+    private String symbol;
+
     @JsonProperty("日期")
     private String date;
 
@@ -31,6 +34,14 @@ public class StockData {
     private long transactionCount;
 
     // Getters and Setters
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
     public String getDate() {
         return date;
     }
