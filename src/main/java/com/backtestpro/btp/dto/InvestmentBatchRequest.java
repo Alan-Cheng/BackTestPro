@@ -1,5 +1,15 @@
 package com.backtestpro.btp.dto;
 
-public class InvestmentBatchRequest {
+import java.util.List;
 
+public class InvestmentBatchRequest {
+    private List<InvestmentRequest> investments;
+
+    public List<InvestmentRequest> getInvestments() {
+        return investments;
+    }
+
+    public void setInvestments(List<InvestmentRequest> investments) {
+        this.investments = investments;
+    }
 }

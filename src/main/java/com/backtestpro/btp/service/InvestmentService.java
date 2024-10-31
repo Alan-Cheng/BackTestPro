@@ -13,12 +13,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.backtestpro.btp.dto.InvestmentBatchRequest;
+import com.backtestpro.btp.dto.InvestmentRequest;
 import com.backtestpro.btp.dto.StockData;
 import com.backtestpro.btp.pojo.InvestmentData;
+import com.backtestpro.btp.pojo.InvestmentPortfolio;
 
 @Service
 public class InvestmentService {
@@ -59,8 +65,12 @@ public class InvestmentService {
                         .min(Comparator.comparing(data -> LocalDate.parse(data.getDate(), DATE_FORMATTER))); // 选取最接近的日期
     }
 
-    public List<InvestmentData> getInvestmentData(String symbol, String startDate, String endDate,
-            double investmentAmount, String investmentDay) {
+    public List<InvestmentData> getInvestmentData(InvestmentRequest request) {
+        String symbol = request.getSymbol();
+        String startDate = request.getStartDate();
+        String endDate = request.getEndDate();
+        double investmentAmount = request.getInvestmentAmount();
+        String investmentDay = request.getInvestmentDay();
 
         List<StockData> stockDataList = stockService.getStockData(symbol, startDate, endDate);
         // 使用 filterStockDataByInvestmentDay 获取每个投资日的数据，若有多年則接續年份
@@ -108,5 +118,25 @@ public class InvestmentService {
         }
 
         return investmentDataList;
+    }
+
+    public InvestmentPortfolio getPortfolioReturnData(InvestmentBatchRequest batchRequest) {
+        //取出所有投資請求
+        List<InvestmentRequest> requests = batchRequest.getInvestments();
+        //建立投資組合
+        InvestmentPortfolio portfolio = new InvestmentPortfolio();
+        //對每個投資請求進行處理，建立MAP後加入投資組合
+        Map <String, List<InvestmentData>> investments = new HashMap<>();
+        for (InvestmentRequest request : requests) {
+            try {
+                List<InvestmentData> investmentData = getInvestmentData(request);
+                investments.put(request.getSymbol(), investmentData);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        portfolio.setInvestments(investments);
+        return portfolio;
     }
 }

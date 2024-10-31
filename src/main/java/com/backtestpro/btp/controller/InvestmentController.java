@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+import com.backtestpro.btp.dto.InvestmentBatchRequest;
 import com.backtestpro.btp.dto.InvestmentRequest;
 import com.backtestpro.btp.pojo.InvestmentData;
 import com.backtestpro.btp.pojo.InvestmentPortfolio;
@@ -23,13 +26,8 @@ public class InvestmentController {
 
     @PostMapping("/regular")
     public List<InvestmentData> getRegularInvestmentReturn(@RequestBody InvestmentRequest request) {
-        String symbol = request.getSymbol();
-        String startDate = request.getStartDate();
-        String endDate = request.getEndDate();
-        double investmentAmount = request.getInvestmentAmount();
-        String investmentDay = request.getInvestmentDay();
         try {
-            return investmentService.getInvestmentData(symbol, startDate, endDate, investmentAmount, investmentDay);
+            return investmentService.getInvestmentData(request);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -38,10 +36,12 @@ public class InvestmentController {
     }
 
     @PostMapping("/regular/multiple")
-    public InvestmentPortfolio getRegularMultipleReturn(
-
-    ) {
-        return null;
+    public InvestmentPortfolio getRegularMultipleReturn(@RequestBody InvestmentBatchRequest batchRequest) {
+        try {
+            return investmentService.getPortfolioReturnData(batchRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-
 }

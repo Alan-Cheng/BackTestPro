@@ -18,7 +18,7 @@ public class InvestmentPortfolio {
         this.investments = investments;
     }
 
-    // 添加投資數據
+    // 加入單筆投資數據
     public void addInvestmentData(String symbol, InvestmentData data) {
         investments.computeIfAbsent(symbol, k -> new ArrayList<>()).add(data);
     }
