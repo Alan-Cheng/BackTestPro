@@ -21,7 +21,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/stock")
+@RequestMapping("${app.api-prefix}/stock")
 public class StockController {
 
     @Autowired

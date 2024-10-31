@@ -18,7 +18,7 @@ import com.backtestpro.btp.pojo.InvestmentPortfolio;
 import com.backtestpro.btp.service.InvestmentService;
 
 @RestController
-@RequestMapping("/investment")
+@RequestMapping("${app.api-prefix}/investment")
 public class InvestmentController {
 
     @Autowired
