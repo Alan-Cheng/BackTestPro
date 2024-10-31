@@ -40,30 +40,47 @@ def convert_roc_to_ad(roc_date):
 
 
 def twse_api_request(symbol, date):
-    html = requests.get('https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=%s&stockNo=%s' % (date,symbol))
+    html = requests.get(
+        'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=%s&stockNo=%s' % (date, symbol)
+    )
     content = json.loads(html.text)
     stock_data = content['data']
     col_name = content['fields']
     df = pd.DataFrame(stock_data, columns=col_name)
     df['股票代號'] = symbol
 
-    #處理資料中的逗號與小數點
+    # 處理資料中的逗號與小數點
     columns_to_clean = [
-    "成交股數",
-    "成交金額",
-    "開盤價",
-    "最高價",
-    "最低價",
-    "收盤價",
-    "漲跌價差",
-    "成交筆數"
+        "成交股數",
+        "成交金額",
+        "開盤價",
+        "最高價",
+        "最低價",
+        "收盤價",
+        "漲跌價差",
+        "成交筆數"
     ]
     df[columns_to_clean] = df[columns_to_clean].apply(clean_and_convert)
 
     # 將日期從民國紀年轉為西元年
     df['日期'] = df['日期'].apply(convert_roc_to_ad)
 
+    # 重命名欄位為英文
+    df = df.rename(columns={
+        "股票代號": "symbol",
+        "日期": "date",
+        "成交股數": "volume",
+        "成交金額": "transactionAmount",
+        "開盤價": "open",
+        "最高價": "high",
+        "最低價": "low",
+        "收盤價": "close",
+        "漲跌價差": "priceChange",
+        "成交筆數": "transactionCount"
+    })
+
     return df
+
 
 
 if __name__ == "__main__":

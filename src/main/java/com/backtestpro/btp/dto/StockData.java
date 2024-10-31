@@ -1,38 +1,26 @@
 package com.backtestpro.btp.dto;
 
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StockData {
-    @JsonProperty("股票代號")
     private String symbol;
 
-    @JsonProperty("日期")
     private String date;
 
-    @JsonProperty("成交股數")
     private long volume;
 
-    @JsonProperty("成交金額")
     private String transactionAmount;
 
-    @JsonProperty("開盤價")
     private double open;
 
-    @JsonProperty("最高價")
     private double high;
 
-    @JsonProperty("最低價")
     private double low;
 
-    @JsonProperty("收盤價")
     private double close;
 
-    @JsonProperty("漲跌價差")
     private String priceChange; // 涨跌价差，使用 String 类型以便处理 '+/-' 符号
 
-    @JsonProperty("成交筆數")
     private long transactionCount;
 
     // Getters and Setters
