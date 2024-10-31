@@ -16,8 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-import com.backtestpro.btp.pojo.StockData;
-import com.backtestpro.btp.pojo.StockInfo;
+import com.backtestpro.btp.dto.StockData;
+import com.backtestpro.btp.dto.StockInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 

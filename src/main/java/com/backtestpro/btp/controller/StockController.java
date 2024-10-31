@@ -6,12 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.backtestpro.btp.service.StockService;
 import com.backtestpro.btp.service.InvestmentService;
+import com.backtestpro.btp.dto.StockData;
+import com.backtestpro.btp.dto.StockInfo;
 import com.backtestpro.btp.pojo.InvestmentData;
-import com.backtestpro.btp.pojo.StockData;
-import com.backtestpro.btp.pojo.StockInfo;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -20,15 +21,13 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("/stock")
 public class StockController {
 
     @Autowired
     private StockService stockService;
 
-    @Autowired
-    private InvestmentService investmentService;
-
-    @GetMapping("/stock-data")
+    @GetMapping("/info")
     public List<StockData> getHistoricalStockData(
             @RequestParam String symbol,
             @RequestParam String startDate,
@@ -42,24 +41,7 @@ public class StockController {
         }
     }
 
-    @PostMapping("/regular-investment")
-    public List<InvestmentData> getRegularInvestmentReturn(
-            @RequestParam String symbol,
-            @RequestParam String startDate,
-            @RequestParam String endDate,
-            @RequestParam double investmentAmount,
-            @RequestParam String investmentDay) {
-
-        try {
-            return investmentService.getInvestmentData(symbol, startDate, endDate, investmentAmount, investmentDay);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @GetMapping("/stock-info")
+    @GetMapping("/symbol-info")
     public List<StockInfo> getAllStockSymbol() {
         return stockService.getAllStockInfo();
     }

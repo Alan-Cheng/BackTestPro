@@ -17,8 +17,8 @@ import java.math.MathContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.backtestpro.btp.dto.StockData;
 import com.backtestpro.btp.pojo.InvestmentData;
-import com.backtestpro.btp.pojo.StockData;
 
 @Service
 public class InvestmentService {

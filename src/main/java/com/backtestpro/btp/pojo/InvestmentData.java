@@ -1,6 +1,8 @@
 package com.backtestpro.btp.pojo;
 
 import java.util.List;
+
+import com.backtestpro.btp.dto.StockData;
 public class InvestmentData {
 
     // 投资日期

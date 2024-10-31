@@ -1,4 +1,6 @@
-package com.backtestpro.btp.pojo;
+package com.backtestpro.btp.dto;
+
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

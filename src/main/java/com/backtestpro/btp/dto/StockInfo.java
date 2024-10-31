@@ -1,4 +1,4 @@
-package com.backtestpro.btp.pojo;
+package com.backtestpro.btp.dto;
 
 public class StockInfo {
     private String code;
