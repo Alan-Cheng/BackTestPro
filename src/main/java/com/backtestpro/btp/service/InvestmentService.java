@@ -3,6 +3,7 @@ package com.backtestpro.btp.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
@@ -71,62 +72,71 @@ public class InvestmentService {
         String endDate = request.getEndDate();
         double investmentAmount = request.getInvestmentAmount();
         String investmentDay = request.getInvestmentDay();
-
-        List<StockData> stockDataList = stockService.getStockData(symbol, startDate, endDate);
-        // 使用 filterStockDataByInvestmentDay 获取每个投资日的数据，若有多年則接續年份
-        List<Integer> yearList = Stream.iterate(LocalDate.parse(startDate, DATE_FORMATTER).getYear(), year -> year + 1)
-                .limit(5).collect(Collectors.toList());
-        List<StockData> filteredStockData = new ArrayList<>();
-        for (int year : yearList) {
-            filteredStockData.addAll(filterStockDataByInvestmentDay(stockDataList, investmentDay, year));
+        List<StockData> stockDataList = null;
+        try {
+            stockDataList = stockService.fetchStockData(symbol, startDate, endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        filteredStockData.sort(Comparator.comparing(StockData::getDate)); // 按日期排序
+        if (!stockDataList.isEmpty()) {
+            // 使用 filterStockDataByInvestmentDay 获取每个投资日的数据，若有多年則接續年份
+            List<Integer> yearList = Stream
+                    .iterate(LocalDate.parse(startDate, DATE_FORMATTER).getYear(), year -> year + 1)
+                    .limit(5).collect(Collectors.toList());
+            List<StockData> filteredStockData = new ArrayList<>();
+            for (int year : yearList) {
+                filteredStockData.addAll(filterStockDataByInvestmentDay(stockDataList, investmentDay, year));
+            }
+            filteredStockData.sort(Comparator.comparing(StockData::getDate)); // 按日期排序
 
-        List<InvestmentData> investmentDataList = new ArrayList<>();
-        double totalAmount = 0;
-        double totalShares = 0;
+            List<InvestmentData> investmentDataList = new ArrayList<>();
+            double totalAmount = 0;
+            double totalShares = 0;
 
-        for (StockData stockData : filteredStockData) {
-            InvestmentData investmentData = new InvestmentData();
-            investmentData.setInvestmentDate(stockData.getDate());
-            investmentData.setInvestmentAmount(investmentAmount);
+            for (StockData stockData : filteredStockData) {
+                InvestmentData investmentData = new InvestmentData();
+                investmentData.setInvestmentDate(stockData.getDate());
+                investmentData.setInvestmentAmount(investmentAmount);
 
-            // 計算總投資金額
-            totalAmount += investmentAmount; // 累加投资金额
-            investmentData.setTotalAmount(totalAmount);
+                // 計算總投資金額
+                totalAmount += investmentAmount; // 累加投资金额
+                investmentData.setTotalAmount(totalAmount);
 
-            // 取得當期價格
-            double currentPrice = stockData.getClose();
+                // 取得當期價格
+                double currentPrice = stockData.getClose();
 
-            // 計算當前股份
-            totalShares += investmentAmount / currentPrice;
-            investmentData.setShares(totalShares);
+                // 計算當前股份
+                totalShares += investmentAmount / currentPrice;
+                investmentData.setShares(totalShares);
 
-            // 計算當前收益
-            // (本期購買後擁有的股份)*(本期股價)-(總投入資金)
-            double currentReturn = totalShares * currentPrice - totalAmount;
-            investmentData.setTotalReturn(currentReturn);
+                // 計算當前收益
+                // (本期購買後擁有的股份)*(本期股價)-(總投入資金)
+                double currentReturn = totalShares * currentPrice - totalAmount;
+                investmentData.setTotalReturn(currentReturn);
 
-            // 計算當期收益率
-            double totalReturnRate = currentReturn / totalAmount;
-            investmentData.setTotalReturnRate(totalReturnRate);
+                // 計算當期收益率
+                double totalReturnRate = currentReturn / totalAmount;
+                investmentData.setTotalReturnRate(totalReturnRate);
 
-            // 设置购买的股票列表
-            investmentData.setStock(stockData);
+                // 设置购买的股票列表
+                investmentData.setStock(stockData);
 
-            investmentDataList.add(investmentData);
+                investmentDataList.add(investmentData);
+            }
+            return investmentDataList;
+        } else {
+            return null;
         }
-
-        return investmentDataList;
     }
 
     public InvestmentPortfolio getPortfolioReturnData(InvestmentBatchRequest batchRequest) {
-        //取出所有投資請求
+        // 取出所有投資請求
         List<InvestmentRequest> requests = batchRequest.getInvestments();
-        //建立投資組合
+        // 建立投資組合
         InvestmentPortfolio portfolio = new InvestmentPortfolio();
-        //對每個投資請求進行處理，建立MAP後加入投資組合
-        Map <String, List<InvestmentData>> investments = new HashMap<>();
+        // 對每個投資請求進行處理，建立MAP後加入投資組合
+        Map<String, List<InvestmentData>> investments = new HashMap<>();
         for (InvestmentRequest request : requests) {
             try {
                 List<InvestmentData> investmentData = getInvestmentData(request);

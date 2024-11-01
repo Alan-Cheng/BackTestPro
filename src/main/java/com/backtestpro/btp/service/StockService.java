@@ -3,14 +3,21 @@ package com.backtestpro.btp.service;
 import java.util.Map;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.io.File;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.net.http.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,60 +25,64 @@ import org.springframework.stereotype.Service;
 
 import com.backtestpro.btp.dto.StockData;
 import com.backtestpro.btp.dto.StockInfo;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Service
 public class StockService {
 
-    public List<StockData> getStockData(String symbol, String startDate, String endDate) {
-        List<StockData> stockDataList = new ArrayList<>();
-        try {
-            // 获取 Python 脚本的输入流
-            InputStream is = getClass().getResourceAsStream("/python/stock_data.py");
+    // //把這個方法註解掉，改用Java送請求
+    // public List<StockData> getStockData(String symbol, String startDate, String endDate) {
+    //     List<StockData> stockDataList = new ArrayList<>();
+    //     try {
+    //         // 获取 Python 脚本的输入流
+    //         InputStream is = getClass().getResourceAsStream("/python/stock_data.py");
 
-            // 创建临时文件
-            File tempFile = File.createTempFile("stock_data", ".py");
-            tempFile.deleteOnExit(); // JVM 退出时删除临时文件
+    //         // 创建临时文件
+    //         File tempFile = File.createTempFile("stock_data", ".py");
+    //         tempFile.deleteOnExit(); // JVM 退出时删除临时文件
 
-            // 将脚本内容写入临时文件
-            try (FileOutputStream out = new FileOutputStream(tempFile)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = is.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
+    //         // 将脚本内容写入临时文件
+    //         try (FileOutputStream out = new FileOutputStream(tempFile)) {
+    //             byte[] buffer = new byte[1024];
+    //             int bytesRead;
+    //             while ((bytesRead = is.read(buffer)) != -1) {
+    //                 out.write(buffer, 0, bytesRead);
+    //             }
+    //         }
 
-            // 通过 ProcessBuilder 执行临时文件
-            ProcessBuilder processBuilder = new ProcessBuilder("python", tempFile.getAbsolutePath(), symbol, startDate,
-                    endDate);
-            processBuilder.redirectErrorStream(true); // 合并错误流
-            Process process = processBuilder.start();
+    //         // 通过 ProcessBuilder 执行临时文件
+    //         ProcessBuilder processBuilder = new ProcessBuilder("python", tempFile.getAbsolutePath(), symbol, startDate,
+    //                 endDate);
+    //         processBuilder.redirectErrorStream(true); // 合并错误流
+    //         Process process = processBuilder.start();
 
-            // 读取脚本输出
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
-            }
+    //         // 读取脚本输出
+    //         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    //         StringBuilder output = new StringBuilder();
+    //         String line;
+    //         while ((line = reader.readLine()) != null) {
+    //             output.append(line);
+    //         }
 
-            // 等待脚本完成
-            int exitCode = process.waitFor();
-            if (exitCode == 0) {
-                // 将输出的 JSON 转换为 List<StockData>
-                ObjectMapper mapper = new ObjectMapper();
-                stockDataList = mapper.readValue(output.toString(), mapper.getTypeFactory().constructCollectionType(List.class, StockData.class));
-            } else {
-                System.err.println("Python script execution failed.");
-            }
+    //         // 等待脚本完成
+    //         int exitCode = process.waitFor();
+    //         if (exitCode == 0) {
+    //             // 将输出的 JSON 转换为 List<StockData>
+    //             ObjectMapper mapper = new ObjectMapper();
+    //             stockDataList = mapper.readValue(output.toString(), mapper.getTypeFactory().constructCollectionType(List.class, StockData.class));
+    //         } else {
+    //             System.err.println("Python script execution failed.");
+    //         }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return stockDataList;
-    }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     return stockDataList;
+    // }
 
     public List<StockInfo> getAllStockInfo() {
         String urlString = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL";
@@ -117,5 +128,71 @@ public class StockService {
         }
 
         return stockList; // 返回股票信息列表
+    }
+
+
+    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public List<StockData> fetchStockData(String symbol, String startDate, String endDate) throws IOException, InterruptedException, ParseException {
+        List<StockData> stockDataList = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat twseDateFormat = new SimpleDateFormat("yyyyMM01");
+
+        java.util.Date start = dateFormat.parse(startDate);
+        java.util.Date end = dateFormat.parse(endDate);
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(start);
+
+        while (!cal.getTime().after(end)) {
+            String date = twseDateFormat.format(cal.getTime());
+            List<StockData> monthlyData = fetchMonthlyStockData(symbol, date);
+            stockDataList.addAll(monthlyData);
+
+            // 移動到下個月的第一天
+            cal.add(java.util.Calendar.MONTH, 1);
+            cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+        }
+
+        return stockDataList;
+    }
+
+    private static List<StockData> fetchMonthlyStockData(String symbol, String date) throws IOException, InterruptedException {
+        String url = "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=" + date + "&stockNo=" + symbol;
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        JsonNode rootNode = objectMapper.readTree(response.body());
+
+        if (rootNode.get("data") == null) {
+            return new ArrayList<>(); // 如果沒有數據，返回空列表
+        }
+
+        List<List<String>> data = objectMapper.convertValue(rootNode.get("data"), new TypeReference<>() {});
+        List<StockData> stockDataList = new ArrayList<>();
+
+        for (List<String> row : data) {
+            StockData stockData = new StockData();
+            stockData.setSymbol(symbol);
+            stockData.setDate(convertROCDateToAD(row.get(0)));
+            stockData.setVolume(Long.parseLong(row.get(1).replace(",", "")));
+            stockData.setTransactionAmount(row.get(2).replace(",", ""));
+            stockData.setOpen(Double.parseDouble(row.get(3).replace(",", "")));
+            stockData.setHigh(Double.parseDouble(row.get(4).replace(",", "")));
+            stockData.setLow(Double.parseDouble(row.get(5).replace(",", "")));
+            stockData.setClose(Double.parseDouble(row.get(6).replace(",", "")));
+            stockData.setPriceChange(row.get(7));
+            stockData.setTransactionCount(Long.parseLong(row.get(8).replace(",", "")));
+            
+            stockDataList.add(stockData);
+        }
+
+        return stockDataList;
+    }
+
+    private static String convertROCDateToAD(String rocDate) {
+        String[] parts = rocDate.split("/");
+        int year = Integer.parseInt(parts[0]) + 1911;
+        return year + "-" + parts[1] + "-" + parts[2];
     }
 }

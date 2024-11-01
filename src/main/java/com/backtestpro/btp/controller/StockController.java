@@ -35,7 +35,7 @@ public class StockController {
             @RequestParam String startDate,
             @RequestParam String endDate) {
         try {
-            return stockService.getStockData(symbol, startDate, endDate);
+            return stockService.fetchStockData(symbol, startDate, endDate);
 
         } catch (Exception e) {
             e.printStackTrace();
