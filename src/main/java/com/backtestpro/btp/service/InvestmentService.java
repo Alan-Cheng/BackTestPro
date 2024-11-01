@@ -91,11 +91,11 @@ public class InvestmentService {
             investmentData.setInvestmentDate(stockData.getDate());
             investmentData.setInvestmentAmount(investmentAmount);
 
-            // 计算当前总资产
+            // 計算總投資金額
             totalAmount += investmentAmount; // 累加投资金额
             investmentData.setTotalAmount(totalAmount);
 
-            // 获取当前价格
+            // 取得當期價格
             double currentPrice = stockData.getClose();
 
             // 計算當前股份
@@ -107,7 +107,7 @@ public class InvestmentService {
             double currentReturn = totalShares * currentPrice - totalAmount;
             investmentData.setTotalReturn(currentReturn);
 
-            // 計算當前收益率
+            // 計算當期收益率
             double totalReturnRate = currentReturn / totalAmount;
             investmentData.setTotalReturnRate(totalReturnRate);
 
