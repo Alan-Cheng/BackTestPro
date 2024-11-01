@@ -136,7 +136,7 @@ public class InvestmentService {
                 return null;
             }
         }
-        portfolio.setInvestments(investments);
+        portfolio.setPortfolio(investments);
         return portfolio;
     }
 }

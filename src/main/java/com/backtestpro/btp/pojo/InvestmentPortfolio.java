@@ -8,24 +8,24 @@ import java.util.Map;
 
 public class InvestmentPortfolio {
     // Key 是股票代碼，Value 是該股票的多期 InvestmentData
-    private Map<String, List<InvestmentData>> investments = new HashMap<>();
+    private Map<String, List<InvestmentData>> portfolio = new HashMap<>();
 
-    public Map<String, List<InvestmentData>> getInvestments() {
-        return investments;
+    public Map<String, List<InvestmentData>> getPortfolio() {
+        return portfolio;
     }
 
-    public void setInvestments(Map<String, List<InvestmentData>> investments) {
-        this.investments = investments;
+    public void setPortfolio(Map<String, List<InvestmentData>> portfolio) {
+        this.portfolio = portfolio;
     }
 
     // 加入單筆投資數據
-    public void addInvestmentData(String symbol, InvestmentData data) {
-        investments.computeIfAbsent(symbol, k -> new ArrayList<>()).add(data);
+    public void addInvestmentDataToPortfolio(String symbol, InvestmentData data) {
+        portfolio.computeIfAbsent(symbol, k -> new ArrayList<>()).add(data);
     }
 
     // 取得特定股票的所有投資資料
-    public List<InvestmentData> getInvestmentDataByStock(String symbol) {
-        return investments.getOrDefault(symbol, Collections.emptyList());
+    public List<InvestmentData> getInvestmentDataBySymbol(String symbol) {
+        return portfolio.getOrDefault(symbol, Collections.emptyList());
     }
 }
 
