@@ -48,4 +48,16 @@ public class StockController {
         return stockService.getAllStockInfo();
     }
     
+    @GetMapping("/taiex")
+    public List<StockData> getTaiexData(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+        try {
+            return stockService.fetchTAIEXData(startDate, endDate);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
