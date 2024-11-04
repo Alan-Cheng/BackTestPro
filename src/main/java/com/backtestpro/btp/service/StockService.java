@@ -145,7 +145,7 @@ public class StockService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<StockData> fetchStockData(String symbol, String startDate, String endDate) throws IOException, InterruptedException, ParseException {
-        
+
         List<StockData> stockDataList = new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat twseDateFormat = new SimpleDateFormat("yyyyMM01");
@@ -155,7 +155,8 @@ public class StockService {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.setTime(start);
 
-        String preUrl = symbol == "TAIEX" ? taiexDataUrl : stockDataUrl;
+
+        String preUrl = symbol.equals("TAIEX") ? taiexDataUrl : stockDataUrl;
 
         while (!cal.getTime().after(end)) {
             String date = twseDateFormat.format(cal.getTime());
