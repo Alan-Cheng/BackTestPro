@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import com.backtestpro.btp.dto.AuthRequest;
-import com.backtestpro.btp.util.JwtUtil;
+import com.backtestpro.btp.service.AuthService;
 
 @RestController
 @RequestMapping("${app.api-prefix}/token")
@@ -28,34 +28,20 @@ import com.backtestpro.btp.util.JwtUtil;
 public class AuthenticationController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) {
         try {
-            // 驗證用戶
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
+            // 認證並生成 JWT token
+            String token = authService.authenticateAndGenerateJwt(authRequest.getUsername(), authRequest.getPassword());
 
-            // 如果認證成功，生成JWT並放在response body的data中返回
-            if (authentication.isAuthenticated()) {
-                // 使用 jwtUtil 生成 JWT token
-                String token = jwtUtil.generateToken(authRequest.getUsername());
+            // 構造回應的資料內容，將 token 放入 "data" 鍵中
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", token);
 
-                // 構造回應的資料內容，將 token 放入 "data" 鍵中
-                Map<String, String> responseData = new HashMap<>();
-                responseData.put("token", token);
-
-                // 返回包含 token 的 response body，並回傳 200 OK
-                return ResponseEntity.ok(responseData);
-            } else {
-                // 如果認證失敗，返回 401 Unauthorized
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Collections.singletonMap("message", "Invalid credentials"));
-            }
+            // 返回包含 token 的 response body，並回傳 200 OK
+            return ResponseEntity.ok(responseData);
         } catch (AuthenticationException e) {
             // 捕獲認證異常，返回 401 Unauthorized
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

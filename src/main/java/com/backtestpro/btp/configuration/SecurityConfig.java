@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.User;
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
-    // 測試用的帳號密碼
+    // 測試用的帳號密碼，先存在In-Memory中
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = 
@@ -29,17 +29,6 @@ public class SecurityConfig {
             .password(passwordEncoder().encode("alan"))
             .roles("USER");
         return authenticationManagerBuilder.build();
-    }
-
-    // 使用 InMemoryUserDetailsManager 儲存用戶資訊
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(
-            User.withUsername("alan")
-                .password(passwordEncoder().encode("alan"))
-                .roles("USER")
-                .build()
-        );
     }
 
     @Bean
