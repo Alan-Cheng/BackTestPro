@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,6 +46,33 @@ public class AuthenticationController {
             // 捕獲認證異常，返回 401 Unauthorized
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Collections.singletonMap("message", "Invalid credentials"));
+        }
+    }
+
+    @PostMapping("/verify-token")
+    public ResponseEntity<Map<String, Object>> verifyToken(@RequestHeader("Authorization") String authorizationHeader) {
+        // 檢查 Authorization header 是否存在且以 "Bearer " 開頭
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("verify", false);
+            response.put("message", "Authorization header is missing or incorrect");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+
+        // 提取 token
+        String token = authorizationHeader.substring(7);
+
+        // 驗證 token 是否有效
+        if (authService.validateToken(token)) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("verify", true);
+            response.put("message", "Token is valid");
+            return ResponseEntity.ok(response); // 返回驗證成功的響應
+        } else {
+            Map<String, Object> response = new HashMap<>();
+            response.put("verify", false);
+            response.put("message", "Token is invalid or expired");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response); // 返回驗證失敗的響應
         }
     }
 }

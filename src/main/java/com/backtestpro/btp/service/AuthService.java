@@ -29,7 +29,8 @@ public class AuthService {
         }
     }
 
-
-
-    
+    public boolean validateToken(String token) {
+        String username = jwtUtil.extractUsername(token);
+        return jwtUtil.validateToken(token, username);
+    }
 }
