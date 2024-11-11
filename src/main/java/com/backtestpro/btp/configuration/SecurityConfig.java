@@ -9,25 +9,31 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.User;
 
+import com.backtestpro.btp.filter.JwtFilter;
+
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
+    @Autowired
+    private JwtFilter jwtFilter;
+
     // 測試用的帳號密碼，先存在In-Memory中
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = 
-                http.getSharedObject(AuthenticationManagerBuilder.class);
+        AuthenticationManagerBuilder authenticationManagerBuilder = http
+                .getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.inMemoryAuthentication()
-            .withUser("alan")
-            .password(passwordEncoder().encode("alan"))
-            .roles("USER");
+                .withUser("alan")
+                .password(passwordEncoder().encode("alan"))
+                .roles("USER");
         return authenticationManagerBuilder.build();
     }
 
@@ -39,9 +45,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(authz -> authz
-                    .anyRequest().permitAll())
-                    .csrf(csrf -> csrf.disable());
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/pie/**").hasRole("VIP") // 只有 VIP 角色的用戶才能訪問 /vip 路徑
+                        .anyRequest().permitAll() // 其他請求都允許
+                )
+                .csrf(csrf -> csrf.disable()) // 禁用 CSRF
+                .sessionManagement(session -> session.disable()) // 禁用 session
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

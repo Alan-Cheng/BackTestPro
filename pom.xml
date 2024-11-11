@@ -48,6 +48,13 @@
 			<artifactId>json</artifactId>
 			<version>20210307</version> <!-- 选择最新的稳定版本 -->
 		</dependency>
+		<!-- Alternatively, add only the Servlet API dependency if you don't need the full web starter -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version> <!-- Choose the appropriate version -->
+			<scope>provided</scope>
+		</dependency>
 		<!-- <dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>

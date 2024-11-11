@@ -49,30 +49,32 @@ public class AuthenticationController {
         }
     }
 
+    // @PostMapping("/verify-token")
+    // public ResponseEntity<Map<String, Object>>
+    // verifyToken(@RequestHeader("Authorization") String authorizationHeader) {
+    // // 調用 service 層來處理驗證邏輯和生成 response
+    // Map<String, Object> response =
+    // authService.validateAndGenerateResponse(authorizationHeader);
+
+    // // 根據驗證結果返回響應
+    // if ((boolean) response.get("verify")) {
+    // return ResponseEntity.ok(response); // 返回驗證成功的響應
+    // } else {
+    // return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response); //
+    // 返回驗證失敗的響應
+    // }
+    // }
+
     @PostMapping("/verify-token")
     public ResponseEntity<Map<String, Object>> verifyToken(@RequestHeader("Authorization") String authorizationHeader) {
-        // 檢查 Authorization header 是否存在且以 "Bearer " 開頭
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("verify", false);
-            response.put("message", "Authorization header is missing or incorrect");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-        }
+        // 創建回應的 Map，設定 verify 為 true
+        Map<String, Object> response = new HashMap<>();
 
-        // 提取 token
-        String token = authorizationHeader.substring(7);
+        // 由於過濾器會處理 JWT 的驗證，若能進入此處，則表示 token 是有效的
+        response.put("verify", true);
+        response.put("message", "Token is valid");
 
-        // 驗證 token 是否有效
-        if (authService.validateToken(token)) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("verify", true);
-            response.put("message", "Token is valid");
-            return ResponseEntity.ok(response); // 返回驗證成功的響應
-        } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put("verify", false);
-            response.put("message", "Token is invalid or expired");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response); // 返回驗證失敗的響應
-        }
+        // 返回驗證成功的響應
+        return ResponseEntity.ok(response);
     }
 }
