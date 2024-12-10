@@ -13,11 +13,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.User;
 
 import com.backtestpro.btp.filter.JwtFilter;
-
+import com.backtestpro.btp.service.CustomUserDetailsService;
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
@@ -25,15 +26,31 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // 測試用的帳號密碼，先存在In-Memory中
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    // // 測試用的帳號密碼，先存在In-Memory中
+    // @Bean
+    // public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    //     AuthenticationManagerBuilder authenticationManagerBuilder = http
+    //             .getSharedObject(AuthenticationManagerBuilder.class);
+    //     authenticationManagerBuilder.inMemoryAuthentication()
+    //             .withUser("alan")
+    //             .password(passwordEncoder().encode("alan"))
+    //             .roles("USER");
+    //     return authenticationManagerBuilder.build();
+    // }
+
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http
                 .getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.inMemoryAuthentication()
-                .withUser("alan")
-                .password(passwordEncoder().encode("alan"))
-                .roles("USER");
+
+        // 配置使用 CustomUserDetailsService
+        authenticationManagerBuilder
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(NoOpPasswordEncoder.getInstance());
+
         return authenticationManagerBuilder.build();
     }
 
