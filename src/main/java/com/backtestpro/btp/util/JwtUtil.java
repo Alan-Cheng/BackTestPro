@@ -1,6 +1,8 @@
 package com.backtestpro.btp.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
@@ -43,7 +45,19 @@ public class JwtUtil {
         return extractClaims(token).getExpiration().before(new Date());
     }
 
-    public boolean validateToken(String token, String username) {
-    return (username.equals(extractUsername(token)) && !isTokenExpired(token));
+    public boolean isTokenSignatureValid(String token) {
+    try {
+        // 使用 secret 或 public key 驗證 JWT 簽名
+        Jws<Claims> claims = Jwts.parser()
+            .setSigningKey(SECRET_KEY)  // 這裡 SECRET_KEY 是你用來簽名的密鑰
+            .parseClaimsJws(token);
+        return true;
+    } catch (JwtException e) {
+        return false;  // Token 不合法，簽名無效
+    }
+    }
+
+    public boolean validateToken(String token) {
+        return (isTokenSignatureValid(token) && !isTokenExpired(token));
     }
 }

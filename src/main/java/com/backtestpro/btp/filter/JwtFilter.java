@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             // 驗證 token 是否有效
-            if (jwtUtil.validateToken(token, username)) {
+            if (jwtUtil.validateToken(token)) {
                 // 提取角色或權限
                 String role = jwtUtil.extractRole(token);  // 假設 "role" 是從 token 中提取的角色
                 Collection<? extends GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_" + role);  // 根據角色創建權限列表

@@ -29,60 +29,14 @@ public class AuthenticationController {
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private UserRepository userRepository;
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody AuthRequest authRequest) {
-        // 檢查帳號是否存在
-        if (!userRepository.existsByUsername(authRequest.getUsername())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "帳號不存在，請先註冊"));
-        }
-
-        try {
-            // 認證並生成 JWT token
-            String token = authService.authenticateAndGenerateJwt(authRequest.getUsername(), authRequest.getPassword());
-
-            // 構造回應的資料內容，將 token 放入 "data" 鍵中
-            Map<String, String> responseData = new HashMap<>();
-            responseData.put("token", token);
-
-            // 返回包含 token 的 response body，並回傳 200 OK
-            return ResponseEntity.ok(responseData);
-        } catch (AuthenticationException e) {
-            // 捕獲認證異常，返回 401 Unauthorized
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "密碼錯誤，請重新再試"));
-        }
+        return this.authService.login(authRequest);
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody AuthRequest authRequest) {
-        try {
-            // 檢查用戶名是否已經存在
-            if (userRepository.existsByUsername(authRequest.getUsername())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Collections.singletonMap("message", "帳號已存在，請重新輸入"));
-            }
-    
-            // 創建新用戶並保存到資料庫
-            AppUser newUser = new AppUser();
-            newUser.setUsername(authRequest.getUsername());
-            newUser.setPassword(authRequest.getPassword());
-            userRepository.save(newUser);
-    
-            // 回傳成功訊息
-            Map<String, String> responseData = new HashMap<>();
-            responseData.put("message", "註冊成功，請重新登入");
-            responseData.put("status", String.valueOf(HttpStatus.CREATED.value()));
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseData);
-    
-        } catch (Exception e) {
-            // 捕獲異常並返回伺服器錯誤
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "發生錯誤，請稍後再試"));
-        }
+        return this.authService.register(authRequest);
     }
 
     // @PostMapping("/verify-token")
