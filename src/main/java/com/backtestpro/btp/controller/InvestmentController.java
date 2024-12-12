@@ -17,6 +17,8 @@ import com.backtestpro.btp.dto.InvestmentRequest;
 import com.backtestpro.btp.pojo.InvestmentData;
 import com.backtestpro.btp.pojo.InvestmentPortfolio;
 import com.backtestpro.btp.service.InvestmentService;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("${app.api-prefix}/investment")
@@ -45,5 +47,10 @@ public class InvestmentController {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @GetMapping("/pie")
+    public InvestmentPortfolio pieTest() {
+        return null;
     }
 }

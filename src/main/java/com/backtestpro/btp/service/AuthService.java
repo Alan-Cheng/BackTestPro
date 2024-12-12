@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,8 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(username, password));
 
         if (authentication.isAuthenticated()) {
-            return jwtUtil.generateToken(username);
+            Optional<AppUser> user = userRepository.findByUsername(username);
+            return jwtUtil.generateToken(user);
         } else {
             return null;
         }
@@ -88,7 +90,7 @@ public class AuthService {
         } catch (AuthenticationException e) {
             // 捕獲認證異常，返回 401 Unauthorized
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "密碼錯誤，請重新再試"));
+                    .body(Collections.singletonMap("message", e.getMessage()));
         }
     }
 
@@ -104,6 +106,7 @@ public class AuthService {
             AppUser newUser = new AppUser();
             newUser.setUsername(authRequest.getUsername());
             newUser.setPassword(authRequest.getPassword());
+            newUser.setRoles(Collections.singletonList("USER"));
             userRepository.save(newUser);
     
             // 回傳成功訊息
