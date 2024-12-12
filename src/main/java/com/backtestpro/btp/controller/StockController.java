@@ -22,7 +22,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("${app.api-prefix}/stock")
+@RequestMapping("/stock")
 @CrossOrigin(origins = "http://localhost:4200")
 public class StockController {
 

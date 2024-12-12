@@ -5,11 +5,9 @@ spring:
 
 server:
   servlet:
-    context-path: /btp
+    context-path: /btp/api
 
 app:
-  api-prefix: /api  # 設定 API 路徑前綴
-
   twse-urls:
     stock-info: "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
     stock-data: "https://www.twse.com.tw/exchangeReport/STOCK_DAY"

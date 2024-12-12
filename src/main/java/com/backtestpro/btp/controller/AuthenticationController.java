@@ -22,7 +22,7 @@ import com.backtestpro.btp.service.AuthService;
 import com.backtestpro.btp.pojo.AppUser;
 
 @RestController
-@RequestMapping("${app.api-prefix}/authenticate")
+@RequestMapping("/authenticate")
 @CrossOrigin(origins = "http://localhost:4200")
 public class AuthenticationController {
 
