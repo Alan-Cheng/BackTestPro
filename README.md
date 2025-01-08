@@ -1,5 +1,7 @@
 # 回測平台 BackTest PRO
 
+![BTP投資設定頁](https://github.com/Alan-Cheng/BackTestPro/blob/main/demo/home.gif?raw=true "投資設定頁面")
+
 ### 功能
 
 * 關鍵字搜尋股票代號、設定投資參數
