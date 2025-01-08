@@ -33,7 +33,7 @@
 >
 >![BTP登入頁](https://github.com/Alan-Cheng/BackTestPro/blob/main/demo/login.png?raw=true "登入頁面")
 >
-> * 帳戶權限展示：
+> * 根據JWT取得帳戶權限展示：
 >
 >![BTP權限](https://github.com/Alan-Cheng/BackTestPro/blob/main/demo/role_detail.png?raw=true "權限展示")
 >
